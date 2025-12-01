@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js + Vite</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Three.js + Vite</title>
-  <link rel="stylesheet" href="./src/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <body>
+    <div id="loading-screen" class="fixed inset-0 flex items-center justify-center z-50 bg-black">
+      <span id="loading-text" class="text-white text-2xl"></span>
+    </div>
+    <div
+      class="fixed bottom-5 right-5 z-50 text-white antialiased will-change-transform transform-gpu select-none"
+      id="flying-text"
+    >
+      Press C to display flying controls
+    </div>
 
-</head>
+    <canvas id="c">
+      <div id="ui"></div>
+    </canvas>
 
-<body>
-  <canvas id="c">
-    <div id="ui"></div>
-  </canvas>
-  <div class="fixed bottom-5 right-5 z-50 text-white antialiased will-change-transform transform-gpu select-none" id="flying-text">Press C to display flying controls</div>
-  <script type="importmap">
+    <script type="importmap">
       {
         "imports": {
           "three": "https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.module.js",
           "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.181.1/examples/jsm/"
         }
       }
-      </script>
-  <script type="module" src="./src/main.js"></script>
-</body>
-
+    </script>
+    <script type="module" src="./src/main.js"></script>
+  </body>
 </html>

@@ -6,9 +6,74 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
-function main() {
+const loadingScreen = document.getElementById("loading-screen");
+const loadingText = document.getElementById("loading-text");
+const flyingText = document.getElementById("flying-text");
+
+flyingText.classList.add("hidden");
+const manager = new THREE.LoadingManager(
+  () => {
+    loadingScreen.classList.add("hidden");
+    flyingText.classList.remove("hidden");
+    main(textures);
+  },
+  (url, loaded, total) => {
+    loadingText.textContent = `Loading: ${Math.round((loaded / total) * 100)}%`;
+  }
+);
+
+const loader = new THREE.TextureLoader(manager);
+const textures = {
+  mercury: loader.load("Mercury.jpg", (mercuryTexture) => {
+    mercuryTexture.minFilter = THREE.LinearFilter;
+    mercuryTexture.magFilter = THREE.LinearFilter;
+    mercuryTexture.generateMipmaps = false;
+  }),
+  venus: loader.load("Venus.jpg", (venusTexture) => {
+    venusTexture.minFilter = THREE.LinearFilter;
+    venusTexture.magFilter = THREE.LinearFilter;
+    venusTexture.generateMipmaps = false;
+  }),
+  earth: loader.load("Earth.jpg", (earthTexture) => {
+    earthTexture.minFilter = THREE.LinearFilter;
+    earthTexture.magFilter = THREE.LinearFilter;
+    earthTexture.generateMipmaps = false;
+  }),
+  moon: loader.load("Moon.jpg", (moonTexture) => {
+    moonTexture.minFilter = THREE.LinearFilter;
+    moonTexture.magFilter = THREE.LinearFilter;
+    moonTexture.generateMipmaps = false;
+  }),
+  mars: loader.load("Mars.jpg", (marsTexture) => {
+    marsTexture.minFilter = THREE.LinearFilter;
+    marsTexture.magFilter = THREE.LinearFilter;
+    marsTexture.generateMipmaps = false;
+  }),
+  jupiter: loader.load("Jupiter.jpg", (jupiterTexture) => {
+    jupiterTexture.minFilter = THREE.LinearFilter;
+    jupiterTexture.magFilter = THREE.LinearFilter;
+    jupiterTexture.generateMipmaps = false;
+  }),
+  saturn: loader.load("Saturn.jpg", (saturnTexture) => {
+    saturnTexture.minFilter = THREE.LinearFilter;
+    saturnTexture.magFilter = THREE.LinearFilter;
+    saturnTexture.generateMipmaps = false;
+  }),
+};
+
+function main(textures) {
   const canvas = document.querySelector("#c");
-  const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    logarithmicDepthBuffer: true,
+    canvas,
+  });
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // sombras suaves
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.setPixelRatio(window.devicePixelRatio * 2);
 
   const fov = 75;
   const aspect = 2;
@@ -20,28 +85,34 @@ function main() {
 
   const controls = new OrbitControls(camera, canvas);
   controls.target.set(0, 0, 0);
-  controls.enablePan = false
+  controls.enablePan = false;
   controls.update();
 
   const flyControls = new FlyControls(camera, canvas);
   flyControls.movementSpeed = 200;
-  flyControls.rollSpeed = Math.PI /4.5;
-  flyControls.autoForward = false ;
+  flyControls.rollSpeed = Math.PI / 4.5;
+  flyControls.autoForward = false;
   flyControls.dragToLook = true;
 
   // Iniciamos con OrbitControls activo
   let activeControls = controls;
   let flying = false;
-  const flyingText = document.getElementById('flying-text')
-  gsap.to(flyingText, {y: -5, ease: 'power1.inOut', duration: 0.5, repeat: -1, yoyo: true})
+  const flyingText = document.getElementById("flying-text");
+  gsap.to(flyingText, {
+    y: -5,
+    ease: "power1.inOut",
+    duration: 0.5,
+    repeat: -1,
+    yoyo: true,
+  });
 
   function toggleControls() {
     flying = !flying;
     activeControls = flying ? flyControls : controls;
-    if(flying){
-      gsap.to(flyingText, {opacity: 0})
+    if (flying) {
+      gsap.to(flyingText, { opacity: 0 });
     } else {
-      gsap.to(flyingText, {opacity: 1})
+      gsap.to(flyingText, { opacity: 1 });
     }
 
     controls.enabled = !flying;
@@ -62,44 +133,61 @@ function main() {
     window.innerWidth,
     window.innerHeight,
     {
-      samples: 4, // anti-aliasing si tu GPU lo soporta
+      samples: 4,
     }
   );
 
-  renderer.toneMapping = THREE.ReinhardToneMapping;
-  renderer.toneMappingExposure = 3;
-
   const composer = new EffectComposer(renderer, renderTarget);
+  composer.setSize(window.innerWidth, window.innerHeight);
+  composer.renderToScreen = true;
   composer.addPass(new RenderPass(scene, camera));
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    1.2,
+    1.5,
     0.4,
-    0.9
+    0.85
   );
   composer.addPass(bloomPass);
 
-  {
-    const color = 0xffffff;
-    const light = new THREE.PointLight(color, 10000, 0);
-    light.position.set(0, 0, 0);
-    scene.add(light);
-  }
+  const sunLight = new THREE.DirectionalLight(0xffffff, 3);
+  sunLight.position.set(100, 0, 100);
+  sunLight.target.position.set(0, 0, 0);
+  sunLight.castShadow = true;
+  sunLight.intensity = 1.5;
+  sunLight.shadow.bias = -0.0001;
+  scene.add(sunLight);
+
+  // Textures Loaders
+
+  const mercuryTexture = textures.mercury;
+
+  const venusTexture = textures.venus;
+
+  const earthTexture = textures.earth;
+
+  const moonTexture = textures.moon;
+
+  const marsTexture = textures.mars;
+
+  const jupiterTexture = textures.jupiter;
+
+  const saturnTexture = textures.saturn;
 
   const radius = 1;
   const sphereGeometry = new THREE.SphereGeometry(radius, 1000, 1000);
-
+ 
+  
   // Sol
   const sunMaterial = new THREE.MeshBasicMaterial({
     color: 0xffff66,
+    side: THREE.DoubleSide,
+    roughness: 1,
+    metalness: 0,
   });
+
   const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
   sunMesh.scale.set(30, 30, 30);
   scene.add(sunMesh);
-
-  const bloomSun = new THREE.Mesh(sphereGeometry, sunMaterial);
-  bloomSun.scale.set(30 * 0.9, 30 * 0.9, 30 * 0.9);
-  scene.add(bloomSun);
 
   // Planetas
   const planets = [
@@ -109,12 +197,11 @@ function main() {
       magnitude: 1,
       orbitSpeed: 0.0415,
       rotationSpeed: 0.0001,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#c6ac8f",
-          emissive: "#7f5539",
-          shininess: 150,
+          map: mercuryTexture,
         })
       ),
     },
@@ -124,12 +211,11 @@ function main() {
       magnitude: 2,
       orbitSpeed: 0.0162,
       rotationSpeed: 0.000017,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#ffcad4",
-          emissive: "#f4acb7",
-          shininess: 150,
+          map: venusTexture,
         })
       ),
     },
@@ -139,12 +225,14 @@ function main() {
       magnitude: 2.5,
       orbitSpeed: 0.01,
       rotationSpeed: 0.005,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: 0x2233ff,
-          emissive: 0x112244,
-          shininess: 150,
+          map: earthTexture,
+          normalMap: null,
+          roughness: 1,
+          metalness: 0,
         })
       ),
     },
@@ -154,12 +242,13 @@ function main() {
       magnitude: 1.5,
       orbitSpeed: 0.0053,
       rotationSpeed: 0.0049,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#e63946",
-          emissive: "#780000",
-          shininess: 150,
+          map: marsTexture,
+          roughness: 1,
+          metalness: 0,
         })
       ),
     },
@@ -169,12 +258,13 @@ function main() {
       magnitude: 5,
       orbitSpeed: 0.0084,
       rotationSpeed: 0.012,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#ee9b00",
-          emissive: "#ca6702",
-          shininess: 150,
+          map: jupiterTexture,
+          roughness: 1,
+          metalness: 0,
         })
       ),
     },
@@ -184,12 +274,13 @@ function main() {
       magnitude: 4,
       orbitSpeed: 0.0034,
       rotationSpeed: 0.01,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#D8C999",
-          emissive: "#302A22",
-          shininess: 150,
+          map: saturnTexture,
+          roughness: 1,
+          metalness: 0,
         })
       ),
     },
@@ -199,6 +290,7 @@ function main() {
       magnitude: 3.5,
       orbitSpeed: 0.0012,
       rotationSpeed: 0.007,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
@@ -214,6 +306,7 @@ function main() {
       magnitude: 3,
       orbitSpeed: 0.0006,
       rotationSpeed: 0.0062,
+      initialAngle: Math.random() * Math.PI * 2,
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
@@ -227,22 +320,24 @@ function main() {
 
   planets.forEach((planet) => {
     planet.mesh.scale.set(planet.magnitude, planet.magnitude, planet.magnitude);
-    planet.mesh.layers.set(0);
     scene.add(planet.mesh);
   });
 
   // Luna
   const moon = {
-    distance: 5,
+    distance: 15,
     orbitSpeed: 0.05,
-    rotationSpeed: 0.1,
+    rotationSpeed: 0.01,
     mesh: new THREE.Mesh(
       sphereGeometry,
-      new THREE.MeshPhongMaterial({ color: 0x888888, emissive: 0x222222 })
+      new THREE.MeshPhongMaterial({
+        map: moonTexture,
+        roughness: 1,
+        metalness: 0,
+      })
     ),
   };
   moon.mesh.scale.set(0.5, 0.5, 0.5);
-  moon.mesh.layers.set(0);
   scene.add(moon.mesh);
 
   // GUI para ajustar velocidades
@@ -251,10 +346,15 @@ function main() {
     const folder = gui.addFolder(planet.name);
     folder.add(planet, "orbitSpeed", 0, 0.4).name("Órbita");
     folder.add(planet, "rotationSpeed", 0, 0.1).name("Rotación");
+    planet.mesh.castShadow = true;
+    planet.mesh.receiveShadow = true;
   });
   const moonFolder = gui.addFolder("Luna");
   moonFolder.add(moon, "orbitSpeed", 0, 0.1).name("Órbita");
   moonFolder.add(moon, "rotationSpeed", 0, 0.1).name("Rotación");
+
+  moon.mesh.castShadow = true;
+  moon.mesh.receiveShadow = true;
 
   let lastTime = 0;
 
@@ -285,7 +385,7 @@ function main() {
 
     // Revoluciones alrededor del sol
     planets.forEach((planet) => {
-      const angle = time * planet.orbitSpeed;
+      const angle = time * planet.orbitSpeed + planet.initialAngle;
       planet.mesh.position.set(
         Math.cos(angle) * planet.distance,
         0,
