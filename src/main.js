@@ -10,7 +10,6 @@ const loadingScreen = document.getElementById("loading-screen");
 const loadingText = document.getElementById("loading-text");
 const flyingText = document.getElementById("flying-text");
 
-flyingText.classList.add("hidden");
 const manager = new THREE.LoadingManager(
   () => {
     loadingScreen.classList.add("hidden");
@@ -24,40 +23,66 @@ const manager = new THREE.LoadingManager(
 
 const loader = new THREE.TextureLoader(manager);
 const textures = {
-  mercury: loader.load("Mercury.jpg", (mercuryTexture) => {
+  mercury: loader.load("../public/Mercury.jpg", (mercuryTexture) => {
     mercuryTexture.minFilter = THREE.LinearFilter;
     mercuryTexture.magFilter = THREE.LinearFilter;
     mercuryTexture.generateMipmaps = false;
   }),
-  venus: loader.load("Venus.jpg", (venusTexture) => {
+  venus: loader.load("../public/Venus.jpg", (venusTexture) => {
     venusTexture.minFilter = THREE.LinearFilter;
     venusTexture.magFilter = THREE.LinearFilter;
     venusTexture.generateMipmaps = false;
   }),
-  earth: loader.load("Earth.jpg", (earthTexture) => {
+  earth: loader.load("../public/Earth.jpg", (earthTexture) => {
     earthTexture.minFilter = THREE.LinearFilter;
     earthTexture.magFilter = THREE.LinearFilter;
     earthTexture.generateMipmaps = false;
   }),
-  moon: loader.load("Moon.jpg", (moonTexture) => {
+  moon: loader.load("../public/Moon.jpg", (moonTexture) => {
     moonTexture.minFilter = THREE.LinearFilter;
     moonTexture.magFilter = THREE.LinearFilter;
     moonTexture.generateMipmaps = false;
   }),
-  mars: loader.load("Mars.jpg", (marsTexture) => {
+  mars: loader.load("../public/Mars.jpg", (marsTexture) => {
     marsTexture.minFilter = THREE.LinearFilter;
     marsTexture.magFilter = THREE.LinearFilter;
     marsTexture.generateMipmaps = false;
   }),
-  jupiter: loader.load("Jupiter.jpg", (jupiterTexture) => {
+  jupiter: loader.load("../public/Jupiter.jpg", (jupiterTexture) => {
     jupiterTexture.minFilter = THREE.LinearFilter;
     jupiterTexture.magFilter = THREE.LinearFilter;
     jupiterTexture.generateMipmaps = false;
   }),
-  saturn: loader.load("Saturn.jpg", (saturnTexture) => {
+  saturn: loader.load("../public/Saturn.jpg", (saturnTexture) => {
     saturnTexture.minFilter = THREE.LinearFilter;
     saturnTexture.magFilter = THREE.LinearFilter;
     saturnTexture.generateMipmaps = false;
+  }),
+  saturnRingTex: loader.load(
+    "../public/PIA22418.jpg",
+    (saturnRingsTexture) => {
+      saturnRingsTexture.minFilter = THREE.LinearFilter;
+      saturnRingsTexture.magFilter = THREE.LinearFilter;
+      saturnRingsTexture.generateMipmaps = false;
+    }
+  ),
+  saturnRingAlpha: loader.load(
+    "../public/SaturnRingAlpha.png",
+    (saturnRingsTexture) => {
+      saturnRingsTexture.minFilter = THREE.LinearFilter;
+      saturnRingsTexture.magFilter = THREE.LinearFilter;
+      saturnRingsTexture.generateMipmaps = false;
+    }
+  ),
+  uranus: loader.load("../public/Uranus.jpg", (uranusTexture) => {
+    uranusTexture.minFilter = THREE.LinearFilter;
+    uranusTexture.magFilter = THREE.LinearFilter;
+    uranusTexture.generateMipmaps = false;
+  }),
+  neptune: loader.load("../public/Neptune.jpg", (neptuneTexture) => {
+    neptuneTexture.minFilter = THREE.LinearFilter;
+    neptuneTexture.magFilter = THREE.LinearFilter;
+    neptuneTexture.generateMipmaps = false;
   }),
 };
 
@@ -70,10 +95,10 @@ function main(textures) {
   });
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap; // sombras suaves
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
   renderer.setPixelRatio(window.devicePixelRatio * 2);
+
 
   const fov = 75;
   const aspect = 2;
@@ -159,24 +184,38 @@ function main(textures) {
 
   // Textures Loaders
 
+  const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+
   const mercuryTexture = textures.mercury;
+  mercuryTexture.anisotropy = maxAnisotropy;
 
   const venusTexture = textures.venus;
+  venusTexture.anisotropy = maxAnisotropy;
 
   const earthTexture = textures.earth;
+  earthTexture.anisotropy = maxAnisotropy;
 
   const moonTexture = textures.moon;
+  moonTexture.anisotropy = maxAnisotropy;
 
   const marsTexture = textures.mars;
+  marsTexture.anisotropy = maxAnisotropy;
 
   const jupiterTexture = textures.jupiter;
+  jupiterTexture.anisotropy = maxAnisotropy;
 
   const saturnTexture = textures.saturn;
+  saturnTexture.anisotropy = maxAnisotropy;
+
+  const uranusTexture = textures.uranus;
+  uranusTexture.anisotropy = maxAnisotropy;
+
+  const neptuneTexture = textures.neptune;
+  neptuneTexture.anisotropy = maxAnisotropy;
 
   const radius = 1;
-  const sphereGeometry = new THREE.SphereGeometry(radius, 1000, 1000);
- 
-  
+  const sphereGeometry = new THREE.SphereGeometry(radius, 64, 64);
+
   // Sol
   const sunMaterial = new THREE.MeshBasicMaterial({
     color: 0xffff66,
@@ -294,9 +333,9 @@ function main(textures) {
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#7FFFD4",
-          emissive: "#003333",
-          shininess: 150,
+          map: uranusTexture,
+          roughness: 1,
+          metalness: 0,
         })
       ),
     },
@@ -310,17 +349,43 @@ function main(textures) {
       mesh: new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshPhongMaterial({
-          color: "#2E3BFF",
-          emissive: "#000033",
-          shininess: 150,
+          map: neptuneTexture,
+          roughness: 1,
+          metalness: 0,
         })
       ),
     },
   ];
 
+  const ringTex = textures.saturnRingTex;
+  const ringAlpha = textures.saturnRingAlpha;
+
   planets.forEach((planet) => {
     planet.mesh.scale.set(planet.magnitude, planet.magnitude, planet.magnitude);
     scene.add(planet.mesh);
+
+    if (planet.name === "Saturno") {
+      const inner = 0.5 * planet.magnitude;
+      const outer = 1 * planet.magnitude;
+      const ringGeo = new THREE.RingGeometry(inner, outer, 256);
+      const uv = ringGeo.attributes.uv;
+      for (let i = 0; i < uv.count; i++) {
+        const x = uv.getX(i);
+        const y = uv.getY(i);
+
+        const mag = Math.sqrt(x * x + y * y);
+        uv.setXY(i, x / mag, y / mag);
+      }
+      const ringMat = new THREE.MeshStandardMaterial({
+        alphaMap: ringAlpha,
+        transparent: true,
+        side: THREE.DoubleSide,
+      });
+      const rings = new THREE.Mesh(ringGeo, ringMat);
+      rings.rotation.x = Math.PI / 2;
+      rings.rotation.z = THREE.MathUtils.degToRad(26.7);
+      planet.mesh.add(rings);
+    }
   });
 
   // Luna
