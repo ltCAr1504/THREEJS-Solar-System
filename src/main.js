@@ -58,14 +58,11 @@ const textures = {
     saturnTexture.magFilter = THREE.LinearFilter;
     saturnTexture.generateMipmaps = false;
   }),
-  saturnRingTex: loader.load(
-    "../public/PIA22418.jpg",
-    (saturnRingsTexture) => {
-      saturnRingsTexture.minFilter = THREE.LinearFilter;
-      saturnRingsTexture.magFilter = THREE.LinearFilter;
-      saturnRingsTexture.generateMipmaps = false;
-    }
-  ),
+  saturnRingTex: loader.load("../public/PIA22418.jpg", (saturnRingsTexture) => {
+    saturnRingsTexture.minFilter = THREE.LinearFilter;
+    saturnRingsTexture.magFilter = THREE.LinearFilter;
+    saturnRingsTexture.generateMipmaps = false;
+  }),
   saturnRingAlpha: loader.load(
     "../public/SaturnRingAlpha.png",
     (saturnRingsTexture) => {
@@ -99,13 +96,12 @@ function main(textures) {
   renderer.toneMappingExposure = 1.1;
   renderer.setPixelRatio(window.devicePixelRatio * 2);
 
-
   const fov = 75;
   const aspect = 2;
   const near = 0.1;
   const far = 10000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(300, 100, 30);
+  camera.position.set(800, 800, 800);
   camera.lookAt(0, 0, 0);
 
   const controls = new OrbitControls(camera, canvas);
@@ -225,14 +221,14 @@ function main(textures) {
   });
 
   const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
-  sunMesh.scale.set(30, 30, 30);
+  sunMesh.scale.set(100, 100, 100);
   scene.add(sunMesh);
 
   // Planetas
   const planets = [
     {
       name: "Mercurio",
-      distance: 100,
+      distance: 400,
       magnitude: 1,
       orbitSpeed: 0.0415,
       rotationSpeed: 0.0001,
@@ -246,7 +242,7 @@ function main(textures) {
     },
     {
       name: "Venus",
-      distance: 200,
+      distance: 800,
       magnitude: 2,
       orbitSpeed: 0.0162,
       rotationSpeed: 0.000017,
@@ -260,7 +256,7 @@ function main(textures) {
     },
     {
       name: "Tierra",
-      distance: 300,
+      distance: 1200,
       magnitude: 2.5,
       orbitSpeed: 0.01,
       rotationSpeed: 0.005,
@@ -277,7 +273,7 @@ function main(textures) {
     },
     {
       name: "Marte",
-      distance: 400,
+      distance: 1400,
       magnitude: 1.5,
       orbitSpeed: 0.0053,
       rotationSpeed: 0.0049,
@@ -293,8 +289,8 @@ function main(textures) {
     },
     {
       name: "Jupiter",
-      distance: 600,
-      magnitude: 5,
+      distance: 2200,
+      magnitude: 25,
       orbitSpeed: 0.0084,
       rotationSpeed: 0.012,
       initialAngle: Math.random() * Math.PI * 2,
@@ -309,8 +305,8 @@ function main(textures) {
     },
     {
       name: "Saturno",
-      distance: 700,
-      magnitude: 4,
+      distance: 2600,
+      magnitude: 20,
       orbitSpeed: 0.0034,
       rotationSpeed: 0.01,
       initialAngle: Math.random() * Math.PI * 2,
@@ -325,8 +321,8 @@ function main(textures) {
     },
     {
       name: "Urano",
-      distance: 800,
-      magnitude: 3.5,
+      distance: 3400,
+      magnitude: 11,
       orbitSpeed: 0.0012,
       rotationSpeed: 0.007,
       initialAngle: Math.random() * Math.PI * 2,
@@ -341,8 +337,8 @@ function main(textures) {
     },
     {
       name: "Nepturno",
-      distance: 900,
-      magnitude: 3,
+      distance: 3800,
+      magnitude: 10,
       orbitSpeed: 0.0006,
       rotationSpeed: 0.0062,
       initialAngle: Math.random() * Math.PI * 2,
@@ -365,17 +361,19 @@ function main(textures) {
     scene.add(planet.mesh);
 
     if (planet.name === "Saturno") {
-      const inner = 0.5 * planet.magnitude;
-      const outer = 1 * planet.magnitude;
+      const inner = 0.07 * planet.magnitude;
+      const outer = 0.15 * planet.magnitude;
       const ringGeo = new THREE.RingGeometry(inner, outer, 256);
+      const pos = ringGeo.attributes.position;
       const uv = ringGeo.attributes.uv;
-      for (let i = 0; i < uv.count; i++) {
-        const x = uv.getX(i);
-        const y = uv.getY(i);
 
-        const mag = Math.sqrt(x * x + y * y);
-        uv.setXY(i, x / mag, y / mag);
+      for (let i = 0; i < uv.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const r = Math.sqrt(x * x + y * y);
+        uv.setXY(i, (r - inner) / (outer - inner), 1);
       }
+
       const ringMat = new THREE.MeshStandardMaterial({
         alphaMap: ringAlpha,
         transparent: true,
@@ -433,6 +431,40 @@ function main(textures) {
     }
     return needResize;
   }
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function goToPlanet(planet) {
+    // Vector de offset: ajusta para alejarte o acercarte del planeta
+    const offset = new THREE.Vector3(
+      planet.magnitude * 5,
+      planet.magnitude * 1.1,
+      0,
+    );
+    camera.position.copy(planet.mesh.position).add(offset);
+
+    // Actualizar OrbitControls para apuntar al planeta
+    controls.target.copy(planet.mesh.position);
+    controls.update();
+  }
+
+  // Detectar clic del mouse
+  window.addEventListener("mousedown", (event) => {
+    // Normalizar coordenadas del mouse (-1 a 1)
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Configurar el raycaster
+    raycaster.setFromCamera(mouse, camera);
+
+    // Intersección con planetas
+    const intersects = raycaster.intersectObjects(planets.map((p) => p.mesh));
+    if (intersects.length > 0) {
+      const planet = planets.find((p) => p.mesh === intersects[0].object);
+      goToPlanet(planet);
+    }
+  });
 
   function render(time) {
     time *= 0.001;
