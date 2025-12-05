@@ -58,11 +58,6 @@ const textures = {
     saturnTexture.magFilter = THREE.LinearFilter;
     saturnTexture.generateMipmaps = false;
   }),
-  saturnRingTex: loader.load("../public/PIA22418.jpg", (saturnRingsTexture) => {
-    saturnRingsTexture.minFilter = THREE.LinearFilter;
-    saturnRingsTexture.magFilter = THREE.LinearFilter;
-    saturnRingsTexture.generateMipmaps = false;
-  }),
   saturnRingAlpha: loader.load(
     "../public/SaturnRingAlpha.png",
     (saturnRingsTexture) => {
@@ -71,6 +66,58 @@ const textures = {
       saturnRingsTexture.generateMipmaps = false;
     }
   ),
+  mimas: loader.load("../public/Mimas.jpg", (mimasTexture) => {
+    mimasTexture.minFilter = THREE.LinearFilter;
+    mimasTexture.magFilter = THREE.LinearFilter;
+    mimasTexture.generateMipmaps = false;
+  }),
+
+  
+  tethys: loader.load("../public/Tethys.jpg", (tethysTexture) => {
+    tethysTexture.minFilter = THREE.LinearFilter;
+    tethysTexture.magFilter = THREE.LinearFilter;
+    tethysTexture.generateMipmaps = false;
+  }),
+  
+  dione: loader.load("../public/Dione.jpg", (dioneTexture) => {
+    dioneTexture.minFilter = THREE.LinearFilter;
+    dioneTexture.magFilter = THREE.LinearFilter;
+    dioneTexture.generateMipmaps = false;
+  }),
+
+  
+  enceladus: loader.load("../public/Enceladus.jpg", (enceladusTexture) => {
+    enceladusTexture.minFilter = THREE.LinearFilter;
+    enceladusTexture.magFilter = THREE.LinearFilter;
+    enceladusTexture.generateMipmaps = false;
+  }),
+  
+  
+  iapetus: loader.load("../public/Iapetus.jpg", (iapetusTexture) => {
+    iapetusTexture.minFilter = THREE.LinearFilter;
+    iapetusTexture.magFilter = THREE.LinearFilter;
+    iapetusTexture.generateMipmaps = false;
+  }),
+  
+  
+  hyperion: loader.load("../public/Hyperion.jpg", (hyperionTexture) => {
+    hyperionTexture.minFilter = THREE.LinearFilter;
+    hyperionTexture.magFilter = THREE.LinearFilter;
+    hyperionTexture.generateMipmaps = false;
+  }),
+  
+  titan: loader.load("../public/Titan.jpg", (titanTexture) => {
+    titanTexture.minFilter = THREE.LinearFilter;
+    titanTexture.magFilter = THREE.LinearFilter;
+    titanTexture.generateMipmaps = false;
+  }),
+  
+  rhea: loader.load("../public/Rhea.png", (rheaTexture) => {
+    rheaTexture.minFilter = THREE.LinearFilter;
+    rheaTexture.magFilter = THREE.LinearFilter;
+    rheaTexture.generateMipmaps = false;
+  }),
+  
   uranus: loader.load("../public/Uranus.jpg", (uranusTexture) => {
     uranusTexture.minFilter = THREE.LinearFilter;
     uranusTexture.magFilter = THREE.LinearFilter;
@@ -91,7 +138,7 @@ function main(textures) {
     canvas,
   });
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // sombras suaves
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
   renderer.setPixelRatio(window.devicePixelRatio * 2);
@@ -110,12 +157,11 @@ function main(textures) {
   controls.update();
 
   const flyControls = new FlyControls(camera, canvas);
-  flyControls.movementSpeed = 200;
+  flyControls.movementSpeed = 600;
   flyControls.rollSpeed = Math.PI / 4.5;
   flyControls.autoForward = false;
   flyControls.dragToLook = true;
 
-  // Iniciamos con OrbitControls activo
   let activeControls = controls;
   let flying = false;
   const flyingText = document.getElementById("flying-text");
@@ -178,8 +224,6 @@ function main(textures) {
   sunLight.shadow.bias = -0.0001;
   scene.add(sunLight);
 
-  // Textures Loaders
-
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
 
   const mercuryTexture = textures.mercury;
@@ -212,7 +256,6 @@ function main(textures) {
   const radius = 1;
   const sphereGeometry = new THREE.SphereGeometry(radius, 64, 64);
 
-  // Sol
   const sunMaterial = new THREE.MeshBasicMaterial({
     color: 0xffff66,
     side: THREE.DoubleSide,
@@ -224,7 +267,6 @@ function main(textures) {
   sunMesh.scale.set(100, 100, 100);
   scene.add(sunMesh);
 
-  // Planetas
   const planets = [
     {
       name: "Mercurio",
@@ -353,7 +395,93 @@ function main(textures) {
     },
   ];
 
-  const ringTex = textures.saturnRingTex;
+  const saturnMoonsGeo = new THREE.SphereGeometry(1, 32, 32);
+
+  const mimasMaterial = new THREE.MeshPhongMaterial({ map: textures.mimas });
+  const tethysMaterial = new THREE.MeshPhongMaterial({ map: textures.tethys });
+  const dioneMaterial = new THREE.MeshPhongMaterial({ map: textures.dione });
+  const enceladusMaterial = new THREE.MeshPhongMaterial({ map: textures.enceladus });
+  const iapetusMaterial = new THREE.MeshPhongMaterial({ map: textures.iapetus });
+  const hyperionMaterial = new THREE.MeshPhongMaterial({ map: textures.hyperion });
+  const titanMaterial = new THREE.MeshPhongMaterial({ map: textures.titan });
+  const rheaMaterial = new THREE.MeshPhongMaterial({ map: textures.rhea });
+
+
+  const saturnMoons = [
+    {
+      name: "Titan",
+      distance: 360, // convertido a tu escala
+      magnitude: 1.2,
+      orbitSpeed: 0.02,
+      rotationSpeed: 0.0005,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, titanMaterial),
+    },
+    {
+      name: "Rhea",
+      distance: 320,
+      magnitude: 0.6,
+      orbitSpeed: 0.034,
+      rotationSpeed: 0.0005,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, rheaMaterial),
+    },
+    {
+      name: "Iapetus",
+      distance: 600,
+      magnitude: 0.9,
+      orbitSpeed: 0.006,
+      rotationSpeed: 0.0004,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, iapetusMaterial),
+    },
+    {
+      name: "Dione",
+      distance: 220,
+      magnitude: 0.45,
+      orbitSpeed: 0.05,
+      rotationSpeed: 0.0005,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, dioneMaterial),
+    },
+    {
+      name: "Tethys",
+      distance: 160,
+      magnitude: 0.4,
+      orbitSpeed: 0.058,
+      rotationSpeed: 0.0005,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, tethysMaterial),
+    },
+    {
+      name: "Enceladus",
+      distance: 120,
+      magnitude: 0.3,
+      orbitSpeed: 0.075,
+      rotationSpeed: 0.0005,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, enceladusMaterial),
+    },
+    {
+      name: "Mimas",
+      distance: 100,
+      magnitude: 0.2,
+      orbitSpeed: 0.02,
+      rotationSpeed: 0.0005,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, mimasMaterial),
+    },
+    {
+      name: "Hyperion",
+      distance: 450,
+      magnitude: 0.5,
+      orbitSpeed: 0.015,
+      rotationSpeed: 0.0004,
+      initialAngle: Math.random() * Math.PI * 2,
+      mesh: new THREE.Mesh(saturnMoonsGeo, hyperionMaterial),
+    },
+  ];
+
   const ringAlpha = textures.saturnRingAlpha;
 
   planets.forEach((planet) => {
@@ -386,7 +514,6 @@ function main(textures) {
     }
   });
 
-  // Luna
   const moon = {
     distance: 15,
     orbitSpeed: 0.05,
@@ -403,7 +530,11 @@ function main(textures) {
   moon.mesh.scale.set(0.5, 0.5, 0.5);
   scene.add(moon.mesh);
 
-  // GUI para ajustar velocidades
+  saturnMoons.forEach((moon) => {
+    moon.mesh.scale.set(moon.magnitude, moon.magnitude, moon.magnitude);
+    scene.add(moon.mesh);
+  });
+
   const gui = new GUI();
   planets.forEach((planet) => {
     const folder = gui.addFolder(planet.name);
@@ -436,29 +567,23 @@ function main(textures) {
   const mouse = new THREE.Vector2();
 
   function goToPlanet(planet) {
-    // Vector de offset: ajusta para alejarte o acercarte del planeta
     const offset = new THREE.Vector3(
       planet.magnitude * 5,
       planet.magnitude * 1.1,
-      0,
+      0
     );
     camera.position.copy(planet.mesh.position).add(offset);
 
-    // Actualizar OrbitControls para apuntar al planeta
     controls.target.copy(planet.mesh.position);
     controls.update();
   }
 
-  // Detectar clic del mouse
   window.addEventListener("mousedown", (event) => {
-    // Normalizar coordenadas del mouse (-1 a 1)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Configurar el raycaster
     raycaster.setFromCamera(mouse, camera);
 
-    // Intersección con planetas
     const intersects = raycaster.intersectObjects(planets.map((p) => p.mesh));
     if (intersects.length > 0) {
       const planet = planets.find((p) => p.mesh === intersects[0].object);
@@ -480,7 +605,6 @@ function main(textures) {
 
     activeControls.update(flying ? delta : undefined);
 
-    // Revoluciones alrededor del sol
     planets.forEach((planet) => {
       const angle = time * planet.orbitSpeed + planet.initialAngle;
       planet.mesh.position.set(
@@ -489,11 +613,9 @@ function main(textures) {
         Math.sin(angle) * planet.distance
       );
 
-      // Rotación sobre su eje
       planet.mesh.rotation.y += planet.rotationSpeed;
     });
 
-    // Revolución de la luna alrededor de la Tierra
     const earth = planets.find((p) => p.name === "Tierra");
     const moonAngle = time * moon.orbitSpeed;
     moon.mesh.position.set(
@@ -502,10 +624,19 @@ function main(textures) {
       earth.mesh.position.z + Math.sin(moonAngle) * moon.distance
     );
 
-    // Rotación sobre su eje
+    const saturn = planets.find((p) => p.name === "Saturno");
+    saturnMoons.forEach((moon) => {
+      const angle = time * moon.orbitSpeed + moon.initialAngle;
+      moon.mesh.position.set(
+        saturn.mesh.position.x + Math.cos(angle) * moon.distance,
+        0,
+        saturn.mesh.position.z + Math.sin(angle) * moon.distance
+      );
+      moon.mesh.rotation.y += moon.rotationSpeed;
+    });
+
     moon.mesh.rotation.y += moon.rotationSpeed;
 
-    // Rotación del sol sobre su eje (opcional)
     sunMesh.rotation.y += 0.001;
 
     composer.render();
@@ -516,4 +647,4 @@ function main(textures) {
   requestAnimationFrame(render);
 }
 
-main();
+
